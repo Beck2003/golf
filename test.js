@@ -2,6 +2,7 @@ const courseSelect = document.getElementById("courseSelect");
 const teeBoxSelect = document.getElementById("teeBoxSelect");
 const scorecardTable = document.getElementById("scorecardTable");
 const holes1018Table = document.getElementById("backnine");
+
 function populateScorecard(courseDetails, selectedTeeType) {
     scorecardTable.innerHTML = '';
     const holes = courseDetails.holes;
@@ -128,11 +129,22 @@ function populateScorecard(courseDetails, selectedTeeType) {
 
   const backfourthRowLastCell = handicapRow1018.insertCell(-1);
   backfourthRowLastCell.textContent;
-  }
+}
   
+  class Player {
+    constructor(name, id, scores = []) {
+      this.name = name;
+      this.id = id;
+      this.scores = scores;
+    }
+ }
+ 
+ const players = [];
 
 // function to add a new player row
 function addPlayerRow(playerName) {
+  const player = new Player(playerName, players.length + 1, Array(18).fill(0));
+  players.push(player);
   // Create a new row for the player in backnine table
   const backNinePlayerRow = holes1018Table.insertRow(-1);
   const backNinePlayerNameCell = backNinePlayerRow.insertCell(0);
@@ -146,10 +158,12 @@ function addPlayerRow(playerName) {
   // Create 9 empty cells for player scores in both tables
   for (let i = 1; i <= 9; i++) {
     const backNinePlayerScoreCell = backNinePlayerRow.insertCell(i);
-    backNinePlayerScoreCell.textContent = ''; // Empty content
+    //backNinePlayerScoreCell.textContent = ''; // Empty content
+    backNinePlayerScoreCell.textContent = i <= 9 ? '' : 'Total'; // Empty content, except for the last cell
 
     const playerScoreCell = playerRow.insertCell(i);
-    playerScoreCell.textContent = ''; // Empty content
+    //playerScoreCell.textContent = ''; // Empty content
+    playerScoreCell.textContent = i <= 9 ? '' : 'Total'; // Empty content, except for the last cell
   }
 }
 // Add an event listener for the "Add Player" button
@@ -165,6 +179,125 @@ addPlayerButton.addEventListener("click", function () {
     alert("Please enter a valid player name.");
   }
 });
+
+// Function to handle cell click and enable editing
+function enableEditing(cell) {
+  // Create an input element
+  const input = document.createElement("input");
+  input.type = "text";
+  input.value = cell.textContent;
+
+  // Replace the cell's content with the input element
+  cell.innerHTML = '';
+  cell.appendChild(input);
+
+  // Focus on the input
+  input.focus();
+
+  // Add an event listener to the input for the "Enter" key press
+  input.addEventListener("keyup", function (e) {
+    if (e.key === "Enter") {
+      //cell.textContent = input.value;
+      const scorevalue = input.value;
+      cell.textContent = scorevalue;
+      updatePlayerScores(cell, scorevalue);
+    }
+  });
+
+  // Remove the input element when it loses focus
+  input.addEventListener("blur", function () {
+    //cell.textContent = input.value;
+    const scorevalue = input.value;
+      cell.textContent = scorevalue;
+      updatePlayerScores(cell, scorevalue);
+  });
+}
+
+// Use event delegation to handle clicks on player cells in both tables
+document.getElementById("scorecardTable").addEventListener("click", function (e) {
+  const target = e.target;
+  if (target.tagName === "TD") {
+    enableEditing(target);
+  }
+});
+
+document.getElementById("backnine").addEventListener("click", function (e) {
+  const target = e.target;
+  if (target.tagName === "TD") {
+    enableEditing(target);
+  }
+});
+
+/*function updatePlayerScores(cell, value) {
+  const columnIndex = cell.cellIndex;
+  const playerIndex = cell.parentElement.rowIndex - 4; // Adjust for header rows
+  let totalScore;
+
+  /*if (playerIndex >= 0 && columnIndex >= 1 && columnIndex <= 9) {
+    const player = players[playerIndex];
+    player.scores[columnIndex - 1] = parseInt(value, 10) || 0;*/
+    /*if (playerIndex >= 0 && columnIndex >= 1) {
+      const player = players[playerIndex];
+      if (cell.parentElement.parentElement.id === 'scorecardTable') {
+        // If it's in the "scorecardTable," update the first 9 scores
+        if (columnIndex <= 9) {
+          player.scores[columnIndex - 1] = parseInt(value, 10) || 0;
+        }
+        // Calculate and update the total score for the player (first 9 scores)
+        totalScore = player.scores.slice(0, 9).reduce((total, score) => total + score, 0);
+      } else if (cell.parentElement.parentElement.id === 'backnine') {
+        // If it's in the "backnine" table, update the next 9 scores
+        if (columnIndex > 9) {
+          player.scores[columnIndex - 10] = parseInt(value, 10) || 0;
+        }
+        // Calculate and update the total score for the player (next 9 scores)
+        totalScore = player.scores.slice(9).reduce((total, score) => total + score, 0);
+
+      }
+
+    // Calculate and update the total score for the player
+    //const totalScore = player.scores.reduce((total, score) => total + score, 0);
+
+    // Update the last column of the player's row with the total score
+    const playerRow = scorecardTable.rows[playerIndex + 4]; // Adjust for header rows
+    const totalCell = playerRow.cells[playerRow.cells.length - 1];
+    totalCell.textContent = totalScore;
+  }
+}*/
+function updatePlayerScores(cell, scorevalue) {
+  console.log("please work.")
+  const columnIndex = cell.cellIndex;
+  const playerIndex = cell.parentElement.rowIndex - 4; // Adjust for header rows
+
+  if (playerIndex >= 0 && columnIndex >= 1) {
+    const player = players[playerIndex];
+    const trimmedValue = scorevalue.trim();
+    
+    if (!isNaN(trimmedValue)) {
+      const score = parseInt(trimmedValue, 10) || 0;
+      
+      if (cell.parentElement.parentElement.id === 'scorecardTable' && columnIndex <= 9) {
+        player.scores[columnIndex - 1] = score;
+      } else if (cell.parentElement.parentElement.id === 'backnine' && columnIndex > 9) {
+        player.scores[columnIndex - 10] = score;
+      }
+
+      // Calculate and update the total score for the player
+      const totalScore = player.scores.reduce((total, score) => total + score, 0);
+
+      // Update the last column of the player's row with the total score
+      const playerRow = cell.parentElement;
+      const totalCell = playerRow.cells[playerRow.cells.length - 1];
+      totalCell.textContent = totalScore;
+
+      // Debugging: Log the player and updated scores
+      console.log("Player:", player);
+      console.log("Updated Scores:", player.scores);
+    }
+  }
+}
+
+
 
 
 
