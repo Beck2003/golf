@@ -4,16 +4,13 @@ body{
     background-size: cover;
     backdrop-filter: blur(0px);
 }
-#course{
+#top-box{
     background-color: green;
-    color: black;
-}
-#tee{
-    background-color: green;
-    color: black;
+    margin: 0 0 20px 0;
+    padding-top: 0px;
 }
 #player-name-button{
-    margin: 30px 0;
+    margin: 20px 0;
 }
 #playerNameInput{
     padding: 5px;

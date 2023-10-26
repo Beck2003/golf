@@ -211,7 +211,6 @@ class Player {
     this.name = name;
     this.id = id;
     this.scores = scores;
-    this.allColumnsFilled = false;
   }
 }
  
@@ -250,7 +249,6 @@ function addPlayerRow(playerName) {
     //playerScoreCell.textContent = ''; // Empty content
     playerScoreCell.textContent = i <= 9 ? '' : 'Total'; // Empty content, except for the last cell
   }
-  //updatePlayerScores(playerName);
 }
 // Add an event listener for the "Add Player" button
 const addPlayerButton = document.getElementById("addPlayerButton");
@@ -347,7 +345,7 @@ function updatePlayerScores(cell, scorevalue) {
       scoresArrayIndex = cell.cellIndex; // Frontnine
     }
 
-    player.scores[scoresArrayIndex - 1] = score;
+    player.scores[scoresArrayIndex -1] = score;
 
     // Calculate and update the total score for the player
     const totalScore1To9 = player.scores.slice(0, 9).reduce((total, score) => total + score, 0);
@@ -364,11 +362,9 @@ function updatePlayerScores(cell, scorevalue) {
     // Update the last cell of the player's row with the combined total score
     const totalCellCombined = playerRow.cells[playerRow.cells.length - 1];
     totalCellCombined.textContent = totalScoreCombined;
-  
+
     if (isScoresArrayFilled(player.scores)) {
       // Display a success message using Toastr
-      //const allScoresFilled = player.scores.every(score => !isNaN(score));
-
       toastr.options = {
         "closeButton": false,
         "debug": false,
@@ -386,8 +382,10 @@ function updatePlayerScores(cell, scorevalue) {
         "showMethod": "fadeIn",
         "hideMethod": "fadeOut",
         "escapeHtml": false
+      };
+      if (isScoresArrayFilled(player.scores)) {
+        toastr.success(`${player.name}, you are (L)PGA Tour material`, "success");
       }
-      toastr.success(`${player.name}, you are (L)PGA Tour material`, "success");
     }
   
     // Debugging: Log the player and updated scores
@@ -401,7 +399,7 @@ function updatePlayerScores(cell, scorevalue) {
 }
 
 function isScoresArrayFilled(scoresArray) {
-  return scoresArray.every(score => !isNaN(score) && score !== null);
+  return scoresArray.every(score => !isNaN(score) && score !== null && score !== 0);
 }
 
 
