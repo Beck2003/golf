@@ -1,5 +1,28 @@
 body{
-    background-image: url(golfBall.jpeg);
+    background-image: url(golfCourse.jpeg);
     background-repeat: no-repeat;
     background-size: cover;
+    backdrop-filter: blur(0px);
+}
+#course{
+    background-color: green;
+    color: black;
+}
+#tee{
+    background-color: green;
+    color: black;
+}
+#player-name-button{
+    margin: 30px 0;
+}
+#playerNameInput{
+    padding: 5px;
+}
+#lets-play{
+    background-color: green;
+}
+.header-row td{
+    background-color: green;
+    color: black;
+    font-weight: bold;
 }
