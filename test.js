@@ -1,61 +1,3 @@
-/*fetch("https://exquisite-pastelito-9d4dd1.netlify.app/golfapi/courses.json")
-.then(response => {
-if (!response.ok) {
-throw new Error(`Unable to retrieve golf courses. Status code: ${response.status}`);
-}
-return response.json();
-})
-.then(data => {
-data.forEach(course => {
-const option = document.createElement("option");
-option.value = course.id;
-option.textContent = course.name;
-courseSelect.appendChild(option);
-});
-
-courseSelect.addEventListener("change", function () {
-const courseId = this.value;
-const selectedCourse = data.find(course => course.id === Number(courseId));
-if (selectedCourse) {
-fetch(selectedCourse.url)
-  .then(response => {
-      if (!response.ok) {
-          throw new Error(`Unable to retrieve course details. Status code: ${response.status}`);
-      }
-      return response.json();
-  })
-  .then(courseDetails => {
-      const totalYardsByTeeType = {};
-      courseDetails.holes.forEach(hole => {
-          hole.teeBoxes.forEach(teeBox => {
-              const teeType = teeBox.teeType;
-              const yards = teeBox.yards;
-              if (!totalYardsByTeeType[teeType]) {
-                  totalYardsByTeeType[teeType] = 0;
-              }
-              totalYardsByTeeType[teeType] += yards;
-          });
-      });
-
-      teeBoxSelect.innerHTML = '';
-      for (const teeType in totalYardsByTeeType) {
-          const option = document.createElement("option");
-          option.value = teeType;
-          option.textContent = `${teeType} - ${totalYardsByTeeType[teeType]} yards`;
-          teeBoxSelect.appendChild(option);
-      }
-
-      // Add an event listener for teeType selection
-      teeBoxSelect.addEventListener("change", function () {
-          const selectedTeeType = this.value;
-          populateScorecard(courseDetails, selectedTeeType);
-      });
-  })
-  .catch(error => console.error('Error fetching course details:', error));
-}
-});
-});*/
-
 const courseSelect = document.getElementById("courseSelect");
 const teeBoxSelect = document.getElementById("teeBoxSelect");
 const scorecardTable = document.getElementById("scorecardTable");
@@ -249,6 +191,14 @@ function addPlayerRow(playerName) {
     //playerScoreCell.textContent = ''; // Empty content
     playerScoreCell.textContent = i <= 9 ? '' : 'Total'; // Empty content, except for the last cell
   }
+
+  // add id to playerRow and backNinePlayerRow
+  playerRow.setAttribute('data-playerid', player.id);
+  playerRow.setAttribute('data-frontOrBack', 'front');
+  
+  backNinePlayerRow.setAttribute('data-playerid', player.id);
+  backNinePlayerRow.setAttribute('data-frontOrBack', 'back');
+
 }
 // Add an event listener for the "Add Player" button
 const addPlayerButton = document.getElementById("addPlayerButton");
@@ -282,21 +232,13 @@ function enableEditing(cell) {
   input.focus();
 
   // Add an event listener to the input for the "Enter" key press
-  input.addEventListener("keyup", function (e) {
-    if (e.key === "Enter") {
+  input.addEventListener("change", function (e) {
       //cell.textContent = input.value;
-      const scorevalue = input.value;
-      cell.textContent = scorevalue;
-      updatePlayerScores(cell, scorevalue);
-    }
-  });
-
-  // Remove the input element when it loses focus
-  input.addEventListener("blur", function () {
-    //cell.textContent = input.value;
     const scorevalue = input.value;
+    
     cell.textContent = scorevalue;
     updatePlayerScores(cell, scorevalue);
+    
   });
 }
 
@@ -343,9 +285,13 @@ function updatePlayerScores(cell, scorevalue) {
       scoresArrayIndex = 9 + cell.cellIndex; // Adjust for zero-based indexing and add 9 for backnine
     } else {
       scoresArrayIndex = cell.cellIndex; // Frontnine
+      // if (cell.cellIndex === 9) {
+      //   scoresArrayIndex = 8; // 0-based index for the 9th hole in the player's scores array
+      // }
+
     }
 
-    player.scores[scoresArrayIndex -1] = score;
+    player.scores[scoresArrayIndex] = score;
 
     // Calculate and update the total score for the player
     const totalScore1To9 = player.scores.slice(0, 9).reduce((total, score) => total + score, 0);
@@ -360,7 +306,7 @@ function updatePlayerScores(cell, scorevalue) {
     const totalScoreCombined = totalScore1To9 + totalScore10To18;
 
     // Update the last cell of the player's row with the combined total score
-    const totalCellCombined = playerRow.cells[playerRow.cells.length - 1];
+    const totalCellCombined = document.querySelector(`table#backnine tr[data-playerid="${player.id}"] td:last-child`);
     totalCellCombined.textContent = totalScoreCombined;
 
     if (isScoresArrayFilled(player.scores)) {
@@ -443,6 +389,9 @@ fetch(selectedCourse.url)
       });
 
       teeBoxSelect.innerHTML = '';
+      const defaultOption = document.createElement("option");
+      defaultOption.textContent = "--Please choose a tee box--";
+      teeBoxSelect.appendChild(defaultOption);
       for (const teeType in totalYardsByTeeType) {
           const option = document.createElement("option");
           option.value = teeType;
