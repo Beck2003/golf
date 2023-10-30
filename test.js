@@ -191,14 +191,6 @@ function addPlayerRow(playerName) {
     //playerScoreCell.textContent = ''; // Empty content
     playerScoreCell.textContent = i <= 9 ? '' : 'Total'; // Empty content, except for the last cell
   }
-
-  // add id to playerRow and backNinePlayerRow
-  playerRow.setAttribute('data-playerid', player.id);
-  playerRow.setAttribute('data-frontOrBack', 'front');
-  
-  backNinePlayerRow.setAttribute('data-playerid', player.id);
-  backNinePlayerRow.setAttribute('data-frontOrBack', 'back');
-
 }
 // Add an event listener for the "Add Player" button
 const addPlayerButton = document.getElementById("addPlayerButton");
@@ -232,13 +224,21 @@ function enableEditing(cell) {
   input.focus();
 
   // Add an event listener to the input for the "Enter" key press
-  input.addEventListener("change", function (e) {
+  input.addEventListener("keyup", function (e) {
+    if (e.key === "Enter") {
       //cell.textContent = input.value;
+      const scorevalue = input.value;
+      cell.textContent = scorevalue;
+      updatePlayerScores(cell, scorevalue);
+    }
+  });
+
+  // Remove the input element when it loses focus
+  input.addEventListener("blur", function () {
+    //cell.textContent = input.value;
     const scorevalue = input.value;
-    
     cell.textContent = scorevalue;
     updatePlayerScores(cell, scorevalue);
-    
   });
 }
 
@@ -285,13 +285,9 @@ function updatePlayerScores(cell, scorevalue) {
       scoresArrayIndex = 9 + cell.cellIndex; // Adjust for zero-based indexing and add 9 for backnine
     } else {
       scoresArrayIndex = cell.cellIndex; // Frontnine
-      // if (cell.cellIndex === 9) {
-      //   scoresArrayIndex = 8; // 0-based index for the 9th hole in the player's scores array
-      // }
-
     }
 
-    player.scores[scoresArrayIndex] = score;
+    player.scores[scoresArrayIndex -1] = score;
 
     // Calculate and update the total score for the player
     const totalScore1To9 = player.scores.slice(0, 9).reduce((total, score) => total + score, 0);
@@ -306,7 +302,7 @@ function updatePlayerScores(cell, scorevalue) {
     const totalScoreCombined = totalScore1To9 + totalScore10To18;
 
     // Update the last cell of the player's row with the combined total score
-    const totalCellCombined = document.querySelector(`table#backnine tr[data-playerid="${player.id}"] td:last-child`);
+    const totalCellCombined = playerRow.cells[playerRow.cells.length - 1];
     totalCellCombined.textContent = totalScoreCombined;
 
     if (isScoresArrayFilled(player.scores)) {
